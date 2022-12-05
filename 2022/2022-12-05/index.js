@@ -1,37 +1,41 @@
 const fs = require("fs");
 
-const lines = fs.readFileSync("input.txt", "utf-8").split("\r\n");
+function load() {
+  const lines = fs.readFileSync("input.txt", "utf-8").split("\r\n");
 
-let iLineEmpty = 0;
-while (lines[iLineEmpty] !== "" && iLineEmpty < lines.length) {
-  iLineEmpty++;
-}
-const iLineCrateNum = iLineEmpty - 1;
-const iLineBottomCrates = iLineCrateNum - 1;
+  let iLineEmpty = 0;
+  while (lines[iLineEmpty] !== "" && iLineEmpty < lines.length) {
+    iLineEmpty++;
+  }
+  const iLineCrateNum = iLineEmpty - 1;
+  const iLineBottomCrates = iLineCrateNum - 1;
 
-const linesCrates = lines.slice(0, iLineCrateNum);
-const numCrates = lines[iLineCrateNum]
-  .trim()
-  .split(/\s+/)
-  .map((n) => parseInt(n))
-  .slice(-1)[0];
-const linesProcedure = lines.slice(iLineEmpty + 1);
+  const linesCrates = lines.slice(0, iLineCrateNum);
+  const numCrates = lines[iLineCrateNum]
+    .trim()
+    .split(/\s+/)
+    .map((n) => parseInt(n))
+    .slice(-1)[0];
+  const linesProcedure = lines.slice(iLineEmpty + 1);
 
-// empty array of arrays
-const crates = Array(numCrates + 1)
-  .fill(null)
-  .map(() => []);
+  // empty array of arrays
+  const crates = Array(numCrates + 1)
+    .fill(null)
+    .map(() => []);
 
-// Go through crates from bottom to top and left to right
-for (let iLine = iLineBottomCrates; iLine >= 0; iLine--) {
-  const line = linesCrates[iLine];
-  for (let iCrate = 1; iCrate <= numCrates; iCrate++) {
-    let c = line[(iCrate - 1) * 4 + 1];
-    if (c !== " ") {
-      crates[iCrate].push(c);
+  // Go through crates from bottom to top and left to right
+  for (let iLine = iLineBottomCrates; iLine >= 0; iLine--) {
+    const line = linesCrates[iLine];
+    for (let iCrate = 1; iCrate <= numCrates; iCrate++) {
+      let c = line[(iCrate - 1) * 4 + 1];
+      if (c !== " ") {
+        crates[iCrate].push(c);
+      }
     }
   }
+  return [crates, linesProcedure];
 }
+const [crates, linesProcedure] = load();
 
 function part1() {
   for (const line of linesProcedure) {
@@ -58,4 +62,5 @@ function part2() {
   return crates.map((arr) => arr[arr.length - 1] || "").join("");
 }
 
+console.log(part1());
 console.log(part2());
