@@ -1,28 +1,4 @@
-const example = `
-[1,1,3,1,1]
-[1,1,5,1,1]
-
-[[1],[2,3,4]]
-[[1],4]
-
-[9]
-[[8,7,6]]
-
-[[4,4],4,4]
-[[4,4],4,4,4]
-
-[7,7,7,7]
-[7,7,7]
-
-[]
-[3]
-
-[[[]]]
-[[]]
-
-[1,[2,[3,[4,[5,6,7]]]],8,9]
-[1,[2,[3,[4,[5,6,0]]]],8,9]
-`;
+const fs = require("fs");
 
 function parseInput(input) {
   let pairs = [];
@@ -54,7 +30,8 @@ function parseInput(input) {
 }
 
 function compareNumbers(left, right) {
-  return left <= right;
+  if (left === right) return undefined;
+  return left < right;
 }
 
 function compareMixed(left, right) {
@@ -63,33 +40,75 @@ function compareMixed(left, right) {
   } else if (typeof right === "number") {
     right = [right];
   }
-  return compareArrays(left, right, false);
+  return compareArrays(left, right);
+  // if (Array.isArray(left)) {
+  //   return compareArrays(left, right);
+  // } else if (Array.isArray(right)) {
+  //   return compareNumbers(left, right[0]);
+  // } else {
+  //   throw new Error("Not a mix of array and number");
+  // }
 }
 
-function compareArrays(left, right, compareLength = true) {
-  for (let i = 0; i < left.length; i++) {
-    if (right[i] === undefined) {
-      return compareLength ? false : true;
-    } else if (typeof left[i] === "number" && typeof right[i] === "number") {
-      if (!compareNumbers(left[i], right[i])) {
-        return false;
-      }
-    } else if (Array.isArray(left[i]) && Array.isArray(right[i])) {
-      if (!compareArrays(left[i], right[i])) {
-        return false;
-      }
+function compareArrays(leftArr, rightArr) {
+  const end = Math.max(leftArr.length, rightArr.length);
+  for (let i = 0; i < end; i++) {
+    const [left, right] = [leftArr[i], rightArr[i]];
+    let res;
+    if (left === undefined) {
+      res = true;
+    } else if (right === undefined) {
+      res = false;
+    } else if (typeof left === "number" && typeof right === "number") {
+      res = compareNumbers(left, right);
+    } else if (Array.isArray(left) && Array.isArray(right)) {
+      res = compareArrays(left, right);
     } else {
-      if (!compareMixed(left[i], right[i])) {
-        return false;
-      }
+      res = compareMixed(left, right);
+    }
+    if (res !== undefined) return res;
+  }
+  return undefined;
+}
+
+function part1(input) {
+  const orderedPairs = [];
+  const pairs = parseInput(input);
+  for (const pair of pairs) {
+    const { left, right } = pair;
+    if (compareArrays(left, right)) {
+      pair.inOrder = true;
+      orderedPairs.push(pair.index);
     }
   }
-  return true;
+  return orderedPairs.reduce((acc, cur) => acc + cur, 0);
 }
 
-const pairs = parseInput(example);
-for (const pair of pairs) {
-  const { left, right } = pair;
-  pair.inOrder = compareArrays(left, right);
-}
-console.log(pairs);
+// Part 1
+const example = `
+[1,1,3,1,1]
+[1,1,5,1,1]
+
+[[1],[2,3,4]]
+[[1],4]
+
+[9]
+[[8,7,6]]
+
+[[4,4],4,4]
+[[4,4],4,4,4]
+
+[7,7,7,7]
+[7,7,7]
+
+[]
+[3]
+
+[[[]]]
+[[]]
+
+[1,[2,[3,[4,[5,6,7]]]],8,9]
+[1,[2,[3,[4,[5,6,0]]]],8,9]
+`;
+if (part1(example) !== 13) throw new Error("Test failed");
+console.log(`Part 1: ${part1(fs.readFileSync(__dirname + "/input.txt", "utf8"))}`);
