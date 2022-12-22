@@ -84,6 +84,24 @@ function part1(input) {
   return orderedPairs.reduce((acc, cur) => acc + cur, 0);
 }
 
+function part2(input) {
+  input = input.trim() + "\n\n[[2]]\n[[6]]\n";
+  const arr = [];
+  parseInput(input).forEach((pair) => {
+    arr.push(pair.left, pair.right);
+  });
+  arr.sort((a, b) => {
+    return compareArrays(a, b) ? -1 : 1;
+  });
+  let res = 1;
+  for (let i = 0; i < arr.length; i++) {
+    if (compareArrays(arr[i], [[2]]) === undefined || compareArrays(arr[i], [[6]]) === undefined) {
+      res *= i + 1;
+    }
+  }
+  return res;
+}
+
 // Part 1
 const example = `
 [1,1,3,1,1]
@@ -112,3 +130,7 @@ const example = `
 `;
 if (part1(example) !== 13) throw new Error("Test failed");
 console.log(`Part 1: ${part1(fs.readFileSync(__dirname + "/input.txt", "utf8"))}`);
+
+// Part 2
+if (part2(example) !== 140) throw new Error("Part 2 test failed");
+console.log(`Part 2: ${part2(fs.readFileSync(__dirname + "/input.txt", "utf8"))}`);
